@@ -5,7 +5,7 @@ import (
 	"time"
 )
 
-func main() {
+func cwin() {
 	t := time.Date(0, 0, 0, 11, 45, 30, 918273645, time.UTC)
 	round := []time.Duration{
 		time.Nanosecond,
