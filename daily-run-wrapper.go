@@ -125,14 +125,26 @@ func runSingleProcess(targetTime civil.Time) {
 
 func mainLoop(targetTime civil.Time) {
 
-	lastRunFileName := getLastRunFileName()
-	hasLastRun := lastReadFileExists(lastRunFileName)
+	log.Print("Starting main loop")
 
-	if !hasLastRun || shouldRun(readTimeFromFile(lastRunFileName), time.Now(), targetTime) {
+	for {
+		lastRunFileName := getLastRunFileName()
+		hasLastRun := lastReadFileExists(lastRunFileName)
 
 		startTime := time.Now()
-		runWrappedCommand()
-		writeTimeToFile(startTime, getLastRunFileName())
+
+		log.Printf("Deciding whether to run with hasLastRun: %v", hasLastRun)
+		if hasLastRun {
+			log.Printf("Last run read from file: %v", readTimeFromFile(lastRunFileName))
+		}
+
+		if !hasLastRun || shouldRun(readTimeFromFile(lastRunFileName), startTime, targetTime) {
+
+			runWrappedCommand()
+			log.Printf("Writing time to file %v", startTime)
+			writeTimeToFile(startTime, getLastRunFileName())
+		}
+		time.Sleep(4 * time.Minute)
 	}
 }
 
@@ -140,6 +152,7 @@ func runWrappedCommand() {
 	logFile, err := openLogFile()
 	defer logFile.Close()
 
+	log.Printf("Running process")
 	command := exec.Command("duply", "zenbook_backup", "backup")
 
 	output, err := command.CombinedOutput()
