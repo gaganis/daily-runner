@@ -5,6 +5,7 @@ import (
 	"cloud.google.com/go/civil"
 	"fmt"
 	"github.com/nightlyone/lockfile"
+	"io"
 	"log"
 	"os"
 	"os/exec"
@@ -155,13 +156,22 @@ func runWrappedCommand() {
 	log.Printf("Running process")
 	command := exec.Command("duply", "zenbook_backup", "backup")
 
-	output, err := command.CombinedOutput()
-	fmt.Print(len(output))
+	stdoutPipe, err := command.StdoutPipe()
 	if err != nil {
 		panic(err)
 	}
 
-	_, err = logFile.Write(output)
+	stderrPipe, err := command.StderrPipe()
+	if err != nil {
+		panic(err)
+	}
+
+	command.Start()
+	_, err = io.Copy(logFile, stdoutPipe)
+	if err != nil {
+		panic(err)
+	}
+	_, err = io.Copy(logFile, stderrPipe)
 	if err != nil {
 		panic(err)
 	}
