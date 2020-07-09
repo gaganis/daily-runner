@@ -5,7 +5,7 @@ import (
 	"path"
 )
 
-var globalProfile = ""
+var globalProfile = "default"
 
 func SetProfile(profile string) {
 	globalProfile = profile

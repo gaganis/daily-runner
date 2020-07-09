@@ -38,17 +38,7 @@ func timeInstanceFromLocalTime(localTime civil.Time, dateSource time.Time) time.
 
 func main() {
 
-	if len(os.Args) == 2 {
-		profile := os.Args[1]
-		matched, _ := regexp.MatchString(`^[0-9a-zA-Z.-_]*$`, profile)
-		if matched {
-			environment.SetProfile(profile)
-		} else {
-			fmt.Printf("Wrong argument. Profile name '%v' can only contain latin "+
-				"letters numbers, and the characters '.-_'. Exiting", profile)
-			os.Exit(1)
-		}
-	}
+	initProfileFromArgs()
 
 	logFile := setupWrapperLogger()
 	defer func() {
@@ -69,6 +59,27 @@ func main() {
 			panic(x)
 		}
 	}()
+}
+
+func initProfileFromArgs() {
+	if len(os.Args) == 2 {
+		profile := os.Args[1]
+
+		if profile == "default" {
+			fmt.Print("Wrong profile name argument provided 'default'. 'default' is reserved and cannot be used. " +
+				"Please provide a different name. Exiting")
+			os.Exit(1)
+		}
+
+		matched, _ := regexp.MatchString(`^[0-9a-zA-Z.-_]*$`, profile)
+		if !matched {
+			fmt.Printf("Wrong profile name argument provided: '%v'. Please provide a name containing only latin "+
+				"letters, numbers and the characters '.-_'. Exiting", profile)
+			os.Exit(1)
+		}
+
+		environment.SetProfile(profile)
+	}
 }
 
 func setupWrapperLogger() *os.File {
