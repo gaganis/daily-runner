@@ -11,6 +11,7 @@ import (
 	"os"
 	"path"
 	"path/filepath"
+	"regexp"
 	"time"
 )
 
@@ -36,6 +37,19 @@ func timeInstanceFromLocalTime(localTime civil.Time, dateSource time.Time) time.
 }
 
 func main() {
+
+	if len(os.Args) == 2 {
+		profile := os.Args[1]
+		matched, _ := regexp.MatchString(`^[0-9a-zA-Z.-_]*$`, profile)
+		if matched {
+			environment.SetProfile(profile)
+		} else {
+			fmt.Printf("Wrong argument. Profile name '%v' can only contain latin "+
+				"letters numbers, and the characters '.-_'. Exiting", profile)
+			os.Exit(1)
+		}
+	}
+
 	logFile := setupWrapperLogger()
 	defer func() {
 		if e := logFile.Close(); e != nil {
