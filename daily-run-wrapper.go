@@ -47,7 +47,10 @@ func writeTimeToFile(timeRun time.Time, fileName string) {
 		panic(fmt.Errorf("Unable to write lastRunFile: %v ", fileName))
 	}
 
-	file.WriteString(timeRun.Format(time.RFC3339))
+	_, err = file.WriteString(timeRun.Format(time.RFC3339))
+	if err != nil {
+		panic(err)
+	}
 }
 
 func readTimeFromFile(fileName string) time.Time {
@@ -68,8 +71,12 @@ func readTimeFromFile(fileName string) time.Time {
 }
 
 func main() {
-	logFile := setupLogger()
-	defer logFile.Close()
+	logFile := setupWrapperLogger()
+	defer func() {
+		if e := logFile.Close(); e != nil {
+			panic(e)
+		}
+	}()
 
 	atTime, err := civil.ParseTime("01:00:00")
 	if err != nil {
@@ -85,7 +92,7 @@ func main() {
 	}()
 }
 
-func setupLogger() *os.File {
+func setupWrapperLogger() *os.File {
 	logFilePath := path.Join(getLocalAppDataDir(), "log/wrapper.log")
 
 	if err := os.MkdirAll(path.Dir(logFilePath), 0755); err != nil {
@@ -141,17 +148,27 @@ func mainLoop(targetTime civil.Time) {
 
 		if !hasLastRun || shouldRun(readTimeFromFile(lastRunFileName), startTime, targetTime) {
 
-			runWrappedCommand()
-			log.Printf("Writing time to file %v", startTime)
-			writeTimeToFile(startTime, getLastRunFileName())
+			if runWrappedCommand() {
+				log.Printf("Writing time to file %v", startTime)
+				writeTimeToFile(startTime, getLastRunFileName())
+			} else {
+				log.Printf("Command failed to run")
+			}
 		}
 		time.Sleep(4 * time.Minute)
 	}
 }
 
-func runWrappedCommand() {
-	logFile, err := openLogFile()
-	defer logFile.Close()
+func runWrappedCommand() bool {
+	logFile, err := openCommandLogFile()
+	if err != nil {
+		panic(err)
+	}
+	defer func() {
+		if e := logFile.Close(); e != nil {
+			panic(e)
+		}
+	}()
 
 	log.Printf("Running process")
 	command := exec.Command("duply", "zenbook_backup", "backup")
@@ -166,7 +183,10 @@ func runWrappedCommand() {
 		panic(err)
 	}
 
-	command.Start()
+	if err = command.Start(); err != nil {
+		panic(err)
+	}
+
 	_, err = io.Copy(logFile, stdoutPipe)
 	if err != nil {
 		panic(err)
@@ -175,13 +195,19 @@ func runWrappedCommand() {
 	if err != nil {
 		panic(err)
 	}
+
+	err = command.Wait()
+	log.Print(err)
+
+	return err == nil
 }
 
-func openLogFile() (*os.File, error) {
+func openCommandLogFile() (*os.File, error) {
 	logFilePath := path.Join(getLocalAppDataDir(), "log/command-output.log")
 	if err := os.MkdirAll(path.Dir(logFilePath), 0755); err != nil {
 		panic(err)
 	}
+
 	logFile, err := os.OpenFile(
 		logFilePath,
 		os.O_APPEND|os.O_CREATE|os.O_WRONLY,
@@ -189,6 +215,7 @@ func openLogFile() (*os.File, error) {
 	if err != nil {
 		panic(err)
 	}
+
 	return logFile, err
 }
 
