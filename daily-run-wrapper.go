@@ -1,14 +1,14 @@
 package main
 
 import (
-	"bufio"
 	"cloud.google.com/go/civil"
+	"daily-run-wrapper/environment"
+	"daily-run-wrapper/persist"
+	"daily-run-wrapper/run"
 	"fmt"
 	"github.com/nightlyone/lockfile"
-	"io"
 	"log"
 	"os"
-	"os/exec"
 	"path"
 	"path/filepath"
 	"time"
@@ -29,45 +29,10 @@ func shouldRun(lastRun time.Time, atTime time.Time, targetTime civil.Time) bool 
 
 func timeInstanceFromLocalTime(localTime civil.Time, dateSource time.Time) time.Time {
 	localDateTime := civil.DateTime{
-		civil.DateOf(dateSource),
-		localTime,
+		Date: civil.DateOf(dateSource),
+		Time: localTime,
 	}
 	return localDateTime.In(time.Local)
-}
-
-func lastReadFileExists(fileName string) bool {
-	_, err := os.Stat(fileName)
-
-	return !os.IsNotExist(err)
-}
-
-func writeTimeToFile(timeRun time.Time, fileName string) {
-	file, err := os.Create(fileName)
-	if err != nil {
-		panic(fmt.Errorf("Unable to write lastRunFile: %v ", fileName))
-	}
-
-	_, err = file.WriteString(timeRun.Format(time.RFC3339))
-	if err != nil {
-		panic(err)
-	}
-}
-
-func readTimeFromFile(fileName string) time.Time {
-	open, err := os.Open(fileName)
-	if err != nil {
-		panic(fmt.Errorf("Unable to read from %v", fileName))
-	}
-
-	scanner := bufio.NewScanner(open)
-	scanner.Scan()
-	scannedText := scanner.Text()
-	parsedTime, err := time.Parse(time.RFC3339, scannedText)
-	if err != nil {
-		panic(fmt.Errorf("unable to parse date from string:  %v in file %v", scannedText, fileName))
-	}
-
-	return parsedTime
 }
 
 func main() {
@@ -80,7 +45,7 @@ func main() {
 
 	atTime, err := civil.ParseTime("01:00:00")
 	if err != nil {
-		panic(fmt.Errorf("Could not parse targetTime %v", err))
+		panic(fmt.Errorf("could not parse targetTime %v", err))
 	}
 	runSingleProcess(atTime)
 
@@ -93,10 +58,10 @@ func main() {
 }
 
 func setupWrapperLogger() *os.File {
-	logFilePath := path.Join(getLocalAppDataDir(), "log/wrapper.log")
+	logFilePath := path.Join(environment.GetLocalAppDataDir(), "log/wrapper.log")
 
 	if err := os.MkdirAll(path.Dir(logFilePath), 0755); err != nil {
-		panic(fmt.Errorf("Unable to create directories to write logfile %v, %v", logFilePath, err))
+		panic(fmt.Errorf("unable to create directories to write logfile %v, %v", logFilePath, err))
 	}
 
 	f, err := os.OpenFile(logFilePath, os.O_RDWR|os.O_CREATE|os.O_APPEND, 0666)
@@ -136,97 +101,26 @@ func mainLoop(targetTime civil.Time) {
 	log.Print("Starting main loop")
 
 	for {
-		lastRunFileName := getLastRunFileName()
-		hasLastRun := lastReadFileExists(lastRunFileName)
+		hasLastRun := persist.LastRunTimeExists()
 
+		// Reading the time before starting the operation as an upload cat take many days to upload
+		// and the start time is more indicative of the backup's freshness
 		startTime := time.Now()
 
 		log.Printf("Deciding whether to run with hasLastRun: %v", hasLastRun)
 		if hasLastRun {
-			log.Printf("Last run read from file: %v", readTimeFromFile(lastRunFileName))
+			log.Printf("Last run read from file: %v", persist.ReadLastRunTime())
 		}
 
-		if !hasLastRun || shouldRun(readTimeFromFile(lastRunFileName), startTime, targetTime) {
+		if !hasLastRun || shouldRun(persist.ReadLastRunTime(), startTime, targetTime) {
 
-			if runWrappedCommand() {
+			if run.WrappedCommand() {
 				log.Printf("Writing time to file %v", startTime)
-				writeTimeToFile(startTime, getLastRunFileName())
+				persist.WriteLastRunTime(startTime)
 			} else {
 				log.Printf("Command failed to run")
 			}
 		}
 		time.Sleep(4 * time.Minute)
 	}
-}
-
-func runWrappedCommand() bool {
-	logFile, err := openCommandLogFile()
-	if err != nil {
-		panic(err)
-	}
-	defer func() {
-		if e := logFile.Close(); e != nil {
-			panic(e)
-		}
-	}()
-
-	log.Printf("Running process")
-	command := exec.Command("duply", "zenbook_backup", "backup")
-
-	stdoutPipe, err := command.StdoutPipe()
-	if err != nil {
-		panic(err)
-	}
-
-	stderrPipe, err := command.StderrPipe()
-	if err != nil {
-		panic(err)
-	}
-
-	if err = command.Start(); err != nil {
-		panic(err)
-	}
-
-	_, err = io.Copy(logFile, stdoutPipe)
-	if err != nil {
-		panic(err)
-	}
-	_, err = io.Copy(logFile, stderrPipe)
-	if err != nil {
-		panic(err)
-	}
-
-	err = command.Wait()
-	log.Print(err)
-
-	return err == nil
-}
-
-func openCommandLogFile() (*os.File, error) {
-	logFilePath := path.Join(getLocalAppDataDir(), "log/command-output.log")
-	if err := os.MkdirAll(path.Dir(logFilePath), 0755); err != nil {
-		panic(err)
-	}
-
-	logFile, err := os.OpenFile(
-		logFilePath,
-		os.O_APPEND|os.O_CREATE|os.O_WRONLY,
-		0644)
-	if err != nil {
-		panic(err)
-	}
-
-	return logFile, err
-}
-
-func getLastRunFileName() string {
-	return path.Join(getLocalAppDataDir(), "last-run")
-}
-
-func getLocalAppDataDir() string {
-	homeDir, err := os.UserHomeDir()
-	if err != nil {
-		panic(err)
-	}
-	return path.Join(homeDir, ".local/share/daily-run-wrapper/")
 }
