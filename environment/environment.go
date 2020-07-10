@@ -3,12 +3,17 @@ package environment
 import (
 	"os"
 	"path"
+	"path/filepath"
 )
 
 var globalProfile = "default"
 
 func SetProfile(profile string) {
 	globalProfile = profile
+}
+
+func GetProfile() string {
+	return globalProfile
 }
 
 func GetLastRunFileName() string {
@@ -27,4 +32,7 @@ func GetLocalAppDataDir() string {
 	} else {
 		return path.Join(nonProfilePath, globalProfile)
 	}
+}
+func LockFilePath() string {
+	return filepath.Join(os.TempDir(), "daily-run-wrapper"+globalProfile+".lck")
 }

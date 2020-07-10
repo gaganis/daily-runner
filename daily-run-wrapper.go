@@ -11,7 +11,6 @@ import (
 	"log"
 	"os"
 	"path"
-	"path/filepath"
 	"time"
 )
 
@@ -76,14 +75,14 @@ func setupWrapperLogger() *os.File {
 
 // This function employs a pid lockfile so that only one process of daily-run-wrapper is running at one time
 func runSingleProcess(configuration Configuration) {
-	lock, err := lockfile.New(filepath.Join(os.TempDir(), "daily-run-wrapper.lck"))
+	lock, err := lockfile.New(environment.LockFilePath())
 	if err != nil {
 		panic(err) // handle properly please!
 	}
 
 	// Error handling is essential, as we only try to get the lock.
 	if err = lock.TryLock(); err != nil {
-		fmt.Print("Another process of daily-run-wrapper is already running, exiting.")
+		fmt.Print("Another process of daily-run-wrapper for profile " + environment.GetProfile() + " is already running, exiting.")
 		os.Exit(1)
 	}
 
