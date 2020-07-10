@@ -2,6 +2,7 @@ package main
 
 import (
 	"cloud.google.com/go/civil"
+	. "daily-run-wrapper/configuration"
 	"daily-run-wrapper/environment"
 	"daily-run-wrapper/persist"
 	"daily-run-wrapper/run"
@@ -11,15 +12,14 @@ import (
 	"os"
 	"path"
 	"path/filepath"
-	"regexp"
 	"time"
 )
 
-func shouldRun(lastRun time.Time, atTime time.Time, targetTime civil.Time) bool {
-
-	//Round time to catch cases where we do not wakeup at precisely the target time
-	roundedTime := atTime.Round(10 * time.Minute)
-	if roundedTime.Equal(timeInstanceFromLocalTime(targetTime, atTime)) {
+func shouldRun(lastRun time.Time, atTime time.Time, configuration Configuration) bool {
+	preferedRunTime := timeInstanceFromLocalTime(configuration.PreferedRunTime, atTime)
+	upperLimitTime := preferedRunTime.Add(configuration.Interval + 10*time.Second)
+	if preferedRunTime.Before(atTime) &&
+		upperLimitTime.After(atTime) {
 		return true
 	}
 	if lastRun.Add(24 * time.Hour).Before(atTime) {
@@ -38,8 +38,9 @@ func timeInstanceFromLocalTime(localTime civil.Time, dateSource time.Time) time.
 
 func main() {
 
-	initProfileFromArgs()
+	configuration := ParseConfigFromFlags()
 
+	environment.SetProfile(configuration.Profile)
 	logFile := setupWrapperLogger()
 	defer func() {
 		if e := logFile.Close(); e != nil {
@@ -47,11 +48,7 @@ func main() {
 		}
 	}()
 
-	atTime, err := civil.ParseTime("01:00:00")
-	if err != nil {
-		panic(fmt.Errorf("could not parse targetTime %v", err))
-	}
-	runSingleProcess(atTime)
+	runSingleProcess(configuration)
 
 	defer func() {
 		if x := recover(); x != nil {
@@ -59,34 +56,6 @@ func main() {
 			panic(x)
 		}
 	}()
-}
-
-func initProfileFromArgs() {
-	if len(os.Args) == 2 {
-		profile := os.Args[1]
-
-		isValid, message := validateProfile(profile)
-		if !isValid {
-			fmt.Print(message)
-			os.Exit(1)
-		}
-		environment.SetProfile(profile)
-	}
-}
-
-func validateProfile(profile string) (bool, string) {
-	if profile == "default" {
-		return false, "Wrong profile name argument provided 'default'. 'default' is reserved and cannot be used. " +
-			"Please provide a different name. Exiting"
-	}
-
-	matched, _ := regexp.MatchString(`^[0-9a-zA-Z.\-_]*$`, profile)
-	if !matched {
-		return false, fmt.Sprintf("Wrong profile name argument provided: '%v'. Please provide a name containing only latin "+
-			"letters, numbers and the characters '.-_'. Exiting", profile)
-	}
-
-	return true, ""
 }
 
 func setupWrapperLogger() *os.File {
@@ -106,7 +75,7 @@ func setupWrapperLogger() *os.File {
 }
 
 // This function employs a pid lockfile so that only one process of daily-run-wrapper is running at one time
-func runSingleProcess(targetTime civil.Time) {
+func runSingleProcess(configuration Configuration) {
 	lock, err := lockfile.New(filepath.Join(os.TempDir(), "daily-run-wrapper.lck"))
 	if err != nil {
 		panic(err) // handle properly please!
@@ -121,14 +90,14 @@ func runSingleProcess(targetTime civil.Time) {
 	defer func() {
 		if err := lock.Unlock(); err != nil {
 			fmt.Printf("Cannot unlock %q, reason: %v", lock, err)
-			panic(err) // handle properly please!
+			panic(err)
 		}
 	}()
 
-	mainLoop(targetTime)
+	mainLoop(configuration)
 }
 
-func mainLoop(targetTime civil.Time) {
+func mainLoop(configuration Configuration) {
 
 	log.Print("Starting main loop")
 
@@ -144,7 +113,7 @@ func mainLoop(targetTime civil.Time) {
 			log.Printf("Last run read from file: %v", persist.ReadLastRunTime())
 		}
 
-		if !hasLastRun || shouldRun(persist.ReadLastRunTime(), startTime, targetTime) {
+		if !hasLastRun || shouldRun(persist.ReadLastRunTime(), startTime, configuration) {
 
 			if run.WrappedCommand() {
 				log.Printf("Writing time to file %v", startTime)
@@ -153,6 +122,6 @@ func mainLoop(targetTime civil.Time) {
 				log.Printf("Command failed to run")
 			}
 		}
-		time.Sleep(4 * time.Minute)
+		time.Sleep(configuration.Interval)
 	}
 }
