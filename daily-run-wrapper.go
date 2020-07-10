@@ -43,12 +43,15 @@ func main() {
 	configuration := ParseConfigFromFlags()
 
 	environment.SetProfile(configuration.Profile)
+	fmt.Printf("Starting daily-run-wrapper with configuration:\n%+v\n", configuration)
+	fmt.Println("Please see logs at: ", environment.WrapperLogFilePath())
 	logFile := setupWrapperLogger()
 	defer func() {
 		if e := logFile.Close(); e != nil {
 			panic(e)
 		}
 	}()
+	log.Printf("Starting daily-run-wrapper with configuration:\n%+v\n", configuration)
 
 	runSingleProcess(configuration)
 
@@ -61,7 +64,7 @@ func main() {
 }
 
 func setupWrapperLogger() *os.File {
-	logFilePath := path.Join(environment.GetLocalAppDataDir(), "log/wrapper.log")
+	logFilePath := environment.WrapperLogFilePath()
 
 	if err := os.MkdirAll(path.Dir(logFilePath), 0755); err != nil {
 		panic(fmt.Errorf("unable to create directories to write logfile %v, %v", logFilePath, err))

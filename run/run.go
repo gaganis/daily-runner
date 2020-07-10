@@ -56,7 +56,7 @@ func WrappedCommand(configuration Configuration) bool {
 }
 
 func openCommandLogFile() (*os.File, error) {
-	logFilePath := path.Join(environment.GetLocalAppDataDir(), "log/command-output.log")
+	logFilePath := environment.CommandLogFilePath()
 	if err := os.MkdirAll(path.Dir(logFilePath), 0755); err != nil {
 		panic(err)
 	}

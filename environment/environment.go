@@ -17,10 +17,10 @@ func GetProfile() string {
 }
 
 func GetLastRunFileName() string {
-	return path.Join(GetLocalAppDataDir(), "last-run")
+	return path.Join(localAppDataDir(), "last-run")
 }
 
-func GetLocalAppDataDir() string {
+func localAppDataDir() string {
 	homeDir, err := os.UserHomeDir()
 	if err != nil {
 		panic(err)
@@ -35,4 +35,11 @@ func GetLocalAppDataDir() string {
 }
 func LockFilePath() string {
 	return filepath.Join(os.TempDir(), "daily-run-wrapper"+globalProfile+".lck")
+}
+
+func WrapperLogFilePath() string {
+	return path.Join(localAppDataDir(), "log/wrapper.log")
+}
+func CommandLogFilePath() string {
+	return path.Join(localAppDataDir(), "log/command-output.log")
 }
