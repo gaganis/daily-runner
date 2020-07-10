@@ -52,7 +52,6 @@ func Test_write_time_and_then_read_from_file(t *testing.T) {
 	//act
 	writeTimeToFile(previousTime, fileName)
 	result := readTimeFromFile(fileName)
-	t.Log(result)
 
 	//assert
 	if !result.Equal(previousTime) {

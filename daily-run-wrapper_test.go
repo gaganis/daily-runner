@@ -69,3 +69,30 @@ func Test_more_than_24_hours_is_true(t *testing.T) {
 		t.Errorf("should run when less than 24 hours %v, %v, %v", atTime, targetTime, previousTime)
 	}
 }
+
+func Test_profile_name_default_is_invalid(t *testing.T) {
+
+	isValid, _ := validateProfile("default")
+
+	if isValid {
+		t.Errorf("profile name 'default' is not valid")
+	}
+}
+
+func Test_profile_name_with_specialcharacter_is_invalid(t *testing.T) {
+
+	isValid, _ := validateProfile("default!@#$%^&*()+=?></.,';\":`~")
+
+	if isValid {
+		t.Errorf("profile name with special characters should be invalid")
+	}
+}
+
+func Test_profile_name_with_allowed_characters_is_invali(t *testing.T) {
+
+	isValid, _ := validateProfile("1234567890qwertyuioplkjhgfdsazxcvbnmQWERTYUIOPLKJHGFDSAZXCVBNM-_.")
+
+	if !isValid {
+		t.Errorf("profile name with latin chars numbers and -_. should be valid")
+	}
+}

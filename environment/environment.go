@@ -28,17 +28,3 @@ func GetLocalAppDataDir() string {
 		return path.Join(nonProfilePath, globalProfile)
 	}
 }
-
-func GetLocalAppConfigDir() string {
-	homeDir, err := os.UserHomeDir()
-	if err != nil {
-		panic(err)
-	}
-	nonProfilePath := path.Join(homeDir, ".config/daily-run-wrapper/")
-
-	if globalProfile == "" {
-		return nonProfilePath
-	} else {
-		return path.Join(nonProfilePath, globalProfile)
-	}
-}
