@@ -115,7 +115,7 @@ func mainLoop(configuration Configuration) {
 
 		if !hasLastRun || shouldRun(persist.ReadLastRunTime(), startTime, configuration) {
 
-			if run.WrappedCommand() {
+			if run.WrappedCommand(configuration) {
 				log.Printf("Writing time to file %v", startTime)
 				persist.WriteLastRunTime(startTime)
 			} else {

@@ -1,15 +1,17 @@
 package run
 
 import (
+	. "daily-run-wrapper/configuration"
 	"daily-run-wrapper/environment"
 	"io"
 	"log"
 	"os"
 	"os/exec"
 	"path"
+	"strings"
 )
 
-func WrappedCommand() bool {
+func WrappedCommand(configuration Configuration) bool {
 	logFile, err := openCommandLogFile()
 	if err != nil {
 		panic(err)
@@ -21,7 +23,8 @@ func WrappedCommand() bool {
 	}()
 
 	log.Printf("Running process")
-	command := exec.Command("duply", "zenbook_backup", "backup")
+	splitCommand := strings.Split(configuration.Command, " ")
+	command := exec.Command(splitCommand[0], splitCommand[1:]...)
 
 	stdoutPipe, err := command.StdoutPipe()
 	if err != nil {
