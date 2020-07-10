@@ -15,12 +15,15 @@ import (
 )
 
 func shouldRun(lastRun time.Time, atTime time.Time, configuration Configuration) bool {
-	preferedRunTime := timeInstanceFromLocalTime(configuration.PreferedRunTime, atTime)
-	upperLimitTime := preferedRunTime.Add(configuration.Interval + 10*time.Second)
-	if preferedRunTime.Before(atTime) &&
-		upperLimitTime.After(atTime) {
-		return true
+	if configuration.HasPreferredRunTime {
+		preferedRunTimeInstance := timeInstanceFromLocalTime(configuration.PreferredRunTime, atTime)
+		upperLimitTime := preferedRunTimeInstance.Add(configuration.Interval + 10*time.Second)
+		if preferedRunTimeInstance.Before(atTime) &&
+			upperLimitTime.After(atTime) {
+			return true
+		}
 	}
+
 	if lastRun.Add(24 * time.Hour).Before(atTime) {
 		return true
 	}
@@ -82,7 +85,7 @@ func runSingleProcess(configuration Configuration) {
 
 	// Error handling is essential, as we only try to get the lock.
 	if err = lock.TryLock(); err != nil {
-		fmt.Print("Another process of daily-run-wrapper for profile " + environment.GetProfile() + " is already running, exiting.")
+		fmt.Println("Another process of daily-run-wrapper for profile " + environment.GetProfile() + " is already running.")
 		os.Exit(1)
 	}
 

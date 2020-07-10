@@ -10,15 +10,16 @@ import (
 )
 
 type Configuration struct {
-	Profile         string
-	Command         string
-	Interval        time.Duration
-	PreferedRunTime civil.Time
+	Profile             string
+	Command             string
+	Interval            time.Duration
+	HasPreferredRunTime bool
+	PreferredRunTime    civil.Time
 }
 
 func ParseConfigFromFlags() Configuration {
 	configuration := Configuration{}
-	flag.StringVar(&configuration.Profile, "profile", "default", "Profile to use. If emtpy defaults to 'default'")
+	flag.StringVar(&configuration.Profile, "profile", "default", "Profile to use. Defaults to 'default'")
 	flag.StringVar(&configuration.Command, "command",
 		"echo 'daily-run-wrapper has run echo printing this text'",
 		"The command that runner will execute")
@@ -38,21 +39,21 @@ func ParseConfigFromFlags() Configuration {
 		os.Exit(2)
 	}
 
-	parsedCivilTime, err2 := civil.ParseTime(*preferedRunTimePtr)
-	if err2 != nil {
-		fmt.Printf("Parsing PreferedRunTime flag failed with error: %v", err2)
-		os.Exit(2)
+	if *preferedRunTimePtr != "" {
+		parsedCivilTime, err2 := civil.ParseTime(*preferedRunTimePtr)
+		if err2 != nil {
+			fmt.Printf("Parsing PreferredRunTime flag failed with error: %v", err2)
+			os.Exit(2)
+		}
+		configuration.HasPreferredRunTime = true
+		configuration.PreferredRunTime = parsedCivilTime
+	} else {
+		configuration.HasPreferredRunTime = false
 	}
-	configuration.PreferedRunTime = parsedCivilTime
 	return configuration
 }
 
 func validateProfile(profile string) (bool, string) {
-	if profile == "default" {
-		return false, "Wrong profile name argument provided 'default'. 'default' is reserved and cannot be used. " +
-			"Please provide a different name. Exiting"
-	}
-
 	matched, _ := regexp.MatchString(`^[0-9a-zA-Z.\-_]*$`, profile)
 	if !matched {
 		return false, fmt.Sprintf("Wrong profile name argument provided: '%v'. Please provide a name containing only latin "+

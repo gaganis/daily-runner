@@ -6,8 +6,8 @@ func Test_profile_name_default_is_invalid(t *testing.T) {
 
 	isValid, _ := validateProfile("default")
 
-	if isValid {
-		t.Errorf("profile name 'default' is not valid")
+	if !isValid {
+		t.Errorf("profile name 'default' must be valid")
 	}
 }
 
