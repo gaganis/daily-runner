@@ -2,7 +2,6 @@ package main
 
 import (
 	"cloud.google.com/go/civil"
-	"daily-run-wrapper/configuration"
 	"testing"
 	"time"
 )
@@ -40,7 +39,7 @@ func Test_4min_after_target_is_true(t *testing.T) {
 	atTime := GetTimeFromString(t, "2020-06-29T01:04:00+03:00")
 	targetTime := getCivilTimeFromString(t, "01:00:00")
 
-	c := configuration.Configuration{
+	c := Configuration{
 		HasPreferredRunTime: true,
 		PreferredRunTime:    targetTime,
 		Interval:            4 * time.Minute,
@@ -57,7 +56,7 @@ func Test_less_than_24_hours_is_false(t *testing.T) {
 	atTime := GetTimeFromString(t, "2020-06-29T08:04:05+03:00")
 	targetTime := getCivilTimeFromString(t, "01:00:00")
 
-	c := configuration.Configuration{
+	c := Configuration{
 		HasPreferredRunTime: true,
 		PreferredRunTime:    targetTime,
 		Interval:            4 * time.Minute,
@@ -73,7 +72,7 @@ func Test_less_than_24_hours_and_HasPreferedTime_false_does_not_run_at_midnight(
 	previousTime := GetTimeFromString(t, "2020-06-29T01:04:05+03:00")
 	atTime := GetTimeFromString(t, "2020-06-29T08:04:05+03:00")
 
-	c := configuration.Configuration{
+	c := Configuration{
 		HasPreferredRunTime: false,
 		Interval:            4 * time.Minute,
 	}
@@ -89,7 +88,7 @@ func Test_more_than_24_hours_is_true(t *testing.T) {
 	atTime := GetTimeFromString(t, "2020-06-29T08:04:05+03:00")
 	targetTime := getCivilTimeFromString(t, "01:00:00")
 
-	c := configuration.Configuration{
+	c := Configuration{
 		HasPreferredRunTime: true,
 		PreferredRunTime:    targetTime,
 		Interval:            4 * time.Minute,

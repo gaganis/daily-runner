@@ -2,10 +2,6 @@ package main
 
 import (
 	"cloud.google.com/go/civil"
-	. "daily-run-wrapper/configuration"
-	"daily-run-wrapper/environment"
-	"daily-run-wrapper/persist"
-	"daily-run-wrapper/run"
 	"fmt"
 	"github.com/nightlyone/lockfile"
 	"log"
@@ -16,9 +12,9 @@ import (
 
 func shouldRun(lastRun time.Time, atTime time.Time, configuration Configuration) bool {
 	if configuration.HasPreferredRunTime {
-		preferedRunTimeInstance := timeInstanceFromLocalTime(configuration.PreferredRunTime, atTime)
-		upperLimitTime := preferedRunTimeInstance.Add(configuration.Interval + 10*time.Second)
-		if preferedRunTimeInstance.Before(atTime) &&
+		preferredRunTimeInstance := timeInstanceFromLocalTime(configuration.PreferredRunTime, atTime)
+		upperLimitTime := preferredRunTimeInstance.Add(configuration.Interval + 10*time.Second)
+		if preferredRunTimeInstance.Before(atTime) &&
 			upperLimitTime.After(atTime) {
 			return true
 		}
@@ -42,9 +38,9 @@ func main() {
 
 	configuration := ParseConfigFromFlags()
 
-	environment.SetProfile(configuration.Profile)
+	SetProfile(configuration.Profile)
 	fmt.Printf("Starting daily-run-wrapper with configuration:\n%+v\n", configuration)
-	fmt.Println("Please see logs at: ", environment.WrapperLogFilePath())
+	fmt.Println("Please see logs at: ", WrapperLogFilePath())
 	logFile := setupWrapperLogger()
 	defer func() {
 		if e := logFile.Close(); e != nil {
@@ -64,7 +60,7 @@ func main() {
 }
 
 func setupWrapperLogger() *os.File {
-	logFilePath := environment.WrapperLogFilePath()
+	logFilePath := WrapperLogFilePath()
 
 	if err := os.MkdirAll(path.Dir(logFilePath), 0755); err != nil {
 		panic(fmt.Errorf("unable to create directories to write logfile %v, %v", logFilePath, err))
@@ -81,14 +77,14 @@ func setupWrapperLogger() *os.File {
 
 // This function employs a pid lockfile so that only one process of daily-run-wrapper is running at one time
 func runSingleProcess(configuration Configuration) {
-	lock, err := lockfile.New(environment.LockFilePath())
+	lock, err := lockfile.New(LockFilePath())
 	if err != nil {
 		panic(err) // handle properly please!
 	}
 
 	// Error handling is essential, as we only try to get the lock.
 	if err = lock.TryLock(); err != nil {
-		fmt.Println("Another process of daily-run-wrapper for profile " + environment.GetProfile() + " is already running.")
+		fmt.Println("Another process of daily-run-wrapper for profile " + GetProfile() + " is already running.")
 		os.Exit(1)
 	}
 
@@ -107,7 +103,7 @@ func mainLoop(configuration Configuration) {
 	log.Print("Starting main loop")
 
 	for {
-		hasLastRun := persist.LastRunTimeExists()
+		hasLastRun := LastRunTimeExists()
 
 		// Reading the time before starting the operation as an upload cat take many days to upload
 		// and the start time is more indicative of the backup's freshness
@@ -115,14 +111,14 @@ func mainLoop(configuration Configuration) {
 
 		log.Printf("Deciding whether to run with hasLastRun: %v", hasLastRun)
 		if hasLastRun {
-			log.Printf("Last run read from file: %v", persist.ReadLastRunTime())
+			log.Printf("Last run read from file: %v", ReadLastRunTime())
 		}
 
-		if !hasLastRun || shouldRun(persist.ReadLastRunTime(), startTime, configuration) {
+		if !hasLastRun || shouldRun(ReadLastRunTime(), startTime, configuration) {
 
-			if run.WrappedCommand(configuration) {
+			if WrappedCommand(configuration) {
 				log.Printf("Writing time to file %v", startTime)
-				persist.WriteLastRunTime(startTime)
+				WriteLastRunTime(startTime)
 			} else {
 				log.Printf("Command failed to run")
 			}

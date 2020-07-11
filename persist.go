@@ -1,23 +1,22 @@
-package persist
+package main
 
 import (
 	"bufio"
-	"daily-run-wrapper/environment"
 	"fmt"
 	"os"
 	"time"
 )
 
 func LastRunTimeExists() bool {
-	return lastReadFileExists(environment.GetLastRunFileName())
+	return lastReadFileExists(GetLastRunFileName())
 }
 
 func WriteLastRunTime(timeRun time.Time) {
-	writeTimeToFile(timeRun, environment.GetLastRunFileName())
+	writeTimeToFile(timeRun, GetLastRunFileName())
 }
 
 func ReadLastRunTime() time.Time {
-	return readTimeFromFile(environment.GetLastRunFileName())
+	return readTimeFromFile(GetLastRunFileName())
 }
 
 func lastReadFileExists(fileName string) bool {

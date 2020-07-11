@@ -1,8 +1,6 @@
-package run
+package main
 
 import (
-	. "daily-run-wrapper/configuration"
-	"daily-run-wrapper/environment"
 	"io"
 	"log"
 	"os"
@@ -56,7 +54,7 @@ func WrappedCommand(configuration Configuration) bool {
 }
 
 func openCommandLogFile() (*os.File, error) {
-	logFilePath := environment.CommandLogFilePath()
+	logFilePath := CommandLogFilePath()
 	if err := os.MkdirAll(path.Dir(logFilePath), 0755); err != nil {
 		panic(err)
 	}

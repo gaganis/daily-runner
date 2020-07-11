@@ -1,4 +1,4 @@
-package configuration
+package main
 
 import (
 	"cloud.google.com/go/civil"

@@ -1,6 +1,8 @@
-package configuration
+package main
 
-import "testing"
+import (
+	"testing"
+)
 
 func Test_profile_name_default_is_invalid(t *testing.T) {
 
