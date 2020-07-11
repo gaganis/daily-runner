@@ -25,7 +25,7 @@ func localAppDataDir() string {
 	if err != nil {
 		panic(err)
 	}
-	nonProfilePath := path.Join(homeDir, ".local/share/daily-run-wrapper/")
+	nonProfilePath := path.Join(homeDir, ".local/share/daily-runner/")
 
 	if globalProfile == "" {
 		return nonProfilePath
@@ -34,7 +34,7 @@ func localAppDataDir() string {
 	}
 }
 func LockFilePath() string {
-	return filepath.Join(os.TempDir(), "daily-run-wrapper"+globalProfile+".lck")
+	return filepath.Join(os.TempDir(), "daily-runner"+globalProfile+".lck")
 }
 
 func WrapperLogFilePath() string {

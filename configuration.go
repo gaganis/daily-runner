@@ -21,11 +21,11 @@ func ParseConfigFromFlags() Configuration {
 	configuration := Configuration{}
 	flag.StringVar(&configuration.Profile, "profile", "default", "Profile to use. Defaults to 'default'")
 	flag.StringVar(&configuration.Command, "command",
-		"echo 'daily-run-wrapper has run echo printing this text'",
+		"echo 'daily-runner has run echo printing this text'",
 		"The command that runner will execute")
 	flag.DurationVar(&configuration.Interval, "interval",
 		4*time.Minute,
-		"The interval that daily-run-wrapper will use to check if it needs to run. "+
+		"The interval that daily-runner will use to check if it needs to run. "+
 			"Can accept values acceptable to golang time.ParseDuration function")
 
 	preferedRunTimePtr := flag.String("preferedTime", "",

@@ -39,7 +39,7 @@ func main() {
 	configuration := ParseConfigFromFlags()
 
 	SetProfile(configuration.Profile)
-	fmt.Printf("Starting daily-run-wrapper with configuration:\n%+v\n", configuration)
+	fmt.Printf("Starting daily-runner with configuration:\n%+v\n", configuration)
 	fmt.Println("Please see logs at: ", WrapperLogFilePath())
 	logFile := setupWrapperLogger()
 	defer func() {
@@ -47,7 +47,7 @@ func main() {
 			panic(e)
 		}
 	}()
-	log.Printf("Starting daily-run-wrapper with configuration:\n%+v\n", configuration)
+	log.Printf("Starting daily-runner with configuration:\n%+v\n", configuration)
 
 	runSingleProcess(configuration)
 
@@ -75,7 +75,7 @@ func setupWrapperLogger() *os.File {
 	return f
 }
 
-// This function employs a pid lockfile so that only one process of daily-run-wrapper is running at one time
+// This function employs a pid lockfile so that only one process of daily-runner is running at one time
 func runSingleProcess(configuration Configuration) {
 	lock, err := lockfile.New(LockFilePath())
 	if err != nil {
@@ -84,7 +84,7 @@ func runSingleProcess(configuration Configuration) {
 
 	// Error handling is essential, as we only try to get the lock.
 	if err = lock.TryLock(); err != nil {
-		fmt.Println("Another process of daily-run-wrapper for profile " + GetProfile() + " is already running.")
+		fmt.Println("Another process of daily-runner for profile " + GetProfile() + " is already running.")
 		os.Exit(1)
 	}
 
