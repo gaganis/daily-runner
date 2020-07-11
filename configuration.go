@@ -28,7 +28,7 @@ func ParseConfigFromFlags() Configuration {
 		"The interval that daily-runner will use to check if it needs to run. "+
 			"Can accept values acceptable to golang time.ParseDuration function")
 
-	preferedRunTimePtr := flag.String("preferedTime", "",
+	preferedRunTimePtr := flag.String("preferredTime", "",
 		"Set a preferred time for the runner to run command. This time overrides the daily logic and the command will always "+
 			"run if the system is up at that time.")
 
