@@ -10,9 +10,9 @@ import (
 	"time"
 )
 
-func shouldRun(lastRun time.Time, atTime time.Time, configuration Configuration) bool {
+func shouldRun(lastRun time.Time, atTime time.Time, configuration Configuration, loc *time.Location) bool {
 	if configuration.HasPreferredRunTime {
-		preferredRunTimeInstance := timeInstanceFromLocalTime(configuration.PreferredRunTime, atTime)
+		preferredRunTimeInstance := timeInstanceFromLocalTime(configuration.PreferredRunTime, atTime, loc)
 		upperLimitTime := preferredRunTimeInstance.Add(configuration.Interval + 10*time.Second)
 		if preferredRunTimeInstance.Before(atTime) &&
 			upperLimitTime.After(atTime) {
@@ -26,12 +26,12 @@ func shouldRun(lastRun time.Time, atTime time.Time, configuration Configuration)
 	return false
 }
 
-func timeInstanceFromLocalTime(localTime civil.Time, dateSource time.Time) time.Time {
+func timeInstanceFromLocalTime(localTime civil.Time, dateSource time.Time, loc *time.Location) time.Time {
 	localDateTime := civil.DateTime{
 		Date: civil.DateOf(dateSource),
 		Time: localTime,
 	}
-	return localDateTime.In(time.Local)
+	return localDateTime.In(loc)
 }
 
 func main() {
@@ -114,7 +114,7 @@ func mainLoop(configuration Configuration) {
 			log.Printf("Last run read from file: %v", ReadLastRunTime())
 		}
 
-		if !hasLastRun || shouldRun(ReadLastRunTime(), startTime, configuration) {
+		if !hasLastRun || shouldRun(ReadLastRunTime(), startTime, configuration, time.Local) {
 
 			if WrappedCommand(configuration) {
 				log.Printf("Writing time to file %v", startTime)
