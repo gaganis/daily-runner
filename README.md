@@ -3,15 +3,17 @@
 `daily-runner` is an application that allows you to run other command line
 applications in a "daily" manner even when a computer is not running 24/7. The
 command will be run if more than 24 hours have passed since the last execution.
-A preferred run time can also be set that overrides the 24h mode and will always run
-if the system is up at this preferred time. It is designed to easily run as
-a non system application with minimal installation by a typical non-root desktop linux user.
+A preferred run time can also be set that overrides the 24h mode and will
+always run if the system is up at this preferred time. It is designed to easily
+run as a non system application with minimal installation by a typical non-root
+desktop linux user.
 
 ## Quick start
 
-* Grab the latest binary release from [releases]() and put it somewhere in your
-  home directory. `$HOME/bin` is a traditional location for user-level
-executables. Alternative you can get the source and use `go install
+* Grab the latest binary release from
+  [releases](https://github.com/gaganis/daily-runner/releases) and put it
+somewhere in your home directory. `$HOME/bin` is a traditional location for
+user-level executables. Alternative you can get the source and use `go install
 daily-runner` this will put the executatable in your `$GOPATH/bin` folder.
 
 * Optionally run `daily-runner` with your command line flags from the command

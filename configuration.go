@@ -20,9 +20,11 @@ type Configuration struct {
 func ParseConfigFromFlags() Configuration {
 	configuration := Configuration{}
 	flag.StringVar(&configuration.Profile, "profile", "default", "Profile to use.")
+
 	flag.StringVar(&configuration.Command, "command",
 		"echo 'daily-runner has run echo printing this text'",
 		"The command that runner will execute")
+
 	flag.DurationVar(&configuration.Interval, "interval",
 		4*time.Minute,
 		"The interval that daily-runner will use to check if it needs to run. "+
