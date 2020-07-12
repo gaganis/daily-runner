@@ -19,7 +19,7 @@ type Configuration struct {
 
 func ParseConfigFromFlags() Configuration {
 	configuration := Configuration{}
-	flag.StringVar(&configuration.Profile, "profile", "default", "Profile to use. Defaults to 'default'")
+	flag.StringVar(&configuration.Profile, "profile", "default", "Profile to use.")
 	flag.StringVar(&configuration.Command, "command",
 		"echo 'daily-runner has run echo printing this text'",
 		"The command that runner will execute")

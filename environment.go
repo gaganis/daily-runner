@@ -38,7 +38,7 @@ func LockFilePath() string {
 }
 
 func WrapperLogFilePath() string {
-	return path.Join(localAppDataDir(), "log/wrapper.log")
+	return path.Join(localAppDataDir(), "log/daily-runner.log")
 }
 func CommandLogFilePath() string {
 	return path.Join(localAppDataDir(), "log/command-output.log")
