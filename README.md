@@ -54,6 +54,8 @@ Usage of /home/gaganis/GolandProjects/bin/daily-runner:
         The command that runner will execute (default "echo 'daily-runner has run echo printing this text'")
   -interval duration
         The interval that daily-runner will use to check if it needs to run. Can accept values acceptable to golang time.ParseDuration function (default 4m0s)
+  -now
+        Run the command immediately. Previous runs are not taken into account. This option also disables process locking, so multiple processes can run at the same time.
   -preferredTime string
         Set a preferred time for the runner to run command. This time overrides the daily logic and the command will always run if the system is up at that time.
   -profile string
@@ -99,6 +101,12 @@ each with it's it's own logging and data about runs. If no profile is set
 
 Locking is implemented via a pid file so that no more than one instance of
 `daily-runner` is running for each profile.
+
+### Imeediate execution
+
+`daily-runner` can be instructed to run the command immediately unsing `-now`.
+In this case previous runs aren't taken into account. This option also disables
+process locking, so it is possible for multiple processes to run at the same time.
 
 ## Motivation
 

@@ -15,6 +15,7 @@ type Configuration struct {
 	Interval            time.Duration
 	HasPreferredRunTime bool
 	PreferredRunTime    civil.Time
+	RunNow              bool
 }
 
 func ParseConfigFromFlags() Configuration {
@@ -29,6 +30,11 @@ func ParseConfigFromFlags() Configuration {
 		4*time.Minute,
 		"The interval that daily-runner will use to check if it needs to run. "+
 			"Can accept values acceptable to golang time.ParseDuration function")
+
+	flag.BoolVar(&configuration.RunNow, "now",
+		false,
+		"Run the command immediately. Previous runs are not taken into account. "+
+			"This option also disables process locking, so multiple processes can run at the same time.")
 
 	preferedRunTimePtr := flag.String("preferredTime", "",
 		"Set a preferred time for the runner to run command. This time overrides the daily logic and the command will always "+

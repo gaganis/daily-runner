@@ -9,7 +9,7 @@ import (
 	"strings"
 )
 
-func WrappedCommand(configuration Configuration) bool {
+func RunCommand(configuration Configuration) bool {
 	logFile, err := openCommandLogFile()
 	if err != nil {
 		panic(err)

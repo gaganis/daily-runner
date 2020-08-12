@@ -49,7 +49,11 @@ func main() {
 	}()
 	log.Printf("Starting daily-runner with configuration:\n%+v\n", configuration)
 
-	runSingleProcess(configuration)
+	if configuration.RunNow {
+		runCommandAndLogTime(configuration)
+	} else {
+		runSingleProcess(configuration)
+	}
 
 	defer func() {
 		if x := recover(); x != nil {
@@ -105,24 +109,27 @@ func mainLoop(configuration Configuration) {
 	for {
 		hasLastRun := LastRunTimeExists()
 
-		// Reading the time before starting the operation as an upload cat take many days to upload
-		// and the start time is more indicative of the backup's freshness
-		startTime := time.Now()
-
 		log.Printf("Deciding whether to run with hasLastRun: %v", hasLastRun)
 		if hasLastRun {
 			log.Printf("Last run read from file: %v", ReadLastRunTime())
 		}
 
-		if !hasLastRun || shouldRun(ReadLastRunTime(), startTime, configuration, time.Local) {
-
-			if WrappedCommand(configuration) {
-				log.Printf("Writing time to file %v", startTime)
-				WriteLastRunTime(startTime)
-			} else {
-				log.Printf("Command failed to run")
-			}
+		if !hasLastRun || shouldRun(ReadLastRunTime(), time.Now(), configuration, time.Local) {
+			runCommandAndLogTime(configuration)
 		}
 		time.Sleep(configuration.Interval)
+	}
+}
+
+func runCommandAndLogTime(configuration Configuration) {
+	// Reading the time before starting the operation as an upload cat take many days to upload
+	// and the start time is more indicative of the backup's freshness
+	startTime := time.Now()
+
+	if RunCommand(configuration) {
+		log.Printf("Writing time to file %v", startTime)
+		WriteLastRunTime(startTime)
+	} else {
+		log.Printf("Command failed to run")
 	}
 }
