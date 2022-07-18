@@ -13,8 +13,8 @@ desktop linux user.
 * Grab the latest binary release from
   [releases](https://github.com/gaganis/daily-runner/releases) and put it
 somewhere in your home directory. `$HOME/bin` is a traditional location for
-user-level executables. Alternative you can get the source and use `go install
-daily-runner` this will put the executatable in your `$GOPATH/bin` folder.
+user-level executables. Alternatively you can get the source and use `go install
+daily-runner` this will put the executable in your `$GOPATH/bin` folder.
 
 * Optionally run `daily-runner` with your command line flags from the command
   line for example for my case
@@ -26,7 +26,7 @@ Starting daily-runner with configuration:
 Please see logs at:  /home/gaganis/.local/share/daily-runner/backup_i7_s3/log/daily-runner.log
 ```
 
-* To make `daily-runner` start when you login in your system you can create a
+* To make `daily-runner` start when you login into your system you can create a
   file in `$HOME/.config/autostart` named `<something>.desktop` For example my
 desktop file for the above profile & command `daily-runner-backup-s3.desktop`:
 
@@ -43,8 +43,8 @@ Comment[en_US]=
 Comment=
 ```
 
-* Alternatively you can you use the gnome UI app `Startup Applications`
-  accessible from you distro's launcher
+* Alternatively you can use the gnome UI app `Startup Applications`
+  accessible from your distro's launcher
 
 ## Usage
 
@@ -57,7 +57,7 @@ Usage of /home/gaganis/GolandProjects/bin/daily-runner:
   -now
         Run the command immediately. Previous runs are not taken into account. This option also disables process locking, so multiple processes can run at the same time.
   -preferredTime string
-        Set a preferred time for the runner to run command. This time overrides the daily logic and the command will always run if the system is up at that time.
+        Set a preferred time for the runner to run the command. This time overrides the daily logic and the command will always run if the system is up at that time.
   -profile string
         Profile to use. Defaults to 'default' (default "default")
 ```
@@ -102,9 +102,9 @@ each with it's it's own logging and data about runs. If no profile is set
 Locking is implemented via a pid file so that no more than one instance of
 `daily-runner` is running for each profile.
 
-### Imeediate execution
+### Immediate execution
 
-`daily-runner` can be instructed to run the command immediately unsing `-now`.
+`daily-runner` can be instructed to run the command immediately using `-now`.
 In this case previous runs aren't taken into account. This option also disables
 process locking, so it is possible for multiple processes to run at the same time.
 
