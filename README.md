@@ -1,6 +1,6 @@
 
 <div align="center">
-    <img src="./images/logo.png" alt="Logo" width="240" height="100">
+    <img src="./images/logo.png" alt="Logo" width="340" height="150">
   </a>
 
   <h3 align="center">Daily-Runner</h3>
@@ -9,7 +9,7 @@
     An awesome Application to run command line Application in "daily" manner.
   </p>
    
-   [Project](#project) | [Motivation](#motivation) | [Quick Start](#start) | [Usage](#usage) | [features](#features) | [License](#license)
+   [About the Project](#project) | [Motivation](#motivation) | [Quick Start](#start) | [Usage](#usage) | [Features](#features) | [License](#license)
 
   
 </div>
