@@ -1,5 +1,21 @@
-# daily-runner
 
+<div align="center">
+    <img src="./images/logo.png" alt="Logo" width="240" height="100">
+  </a>
+
+  <h3 align="center">Daily-Runner</h3>
+
+  <p align="center">
+    An awesome Application to run command line Application in "daily" manner.
+  </p>
+   
+   [Project](#project) | [Motivation](#motivation) | [Quick Start](#start) | [Usage](#usage) | [features](#features) | [License](#license)
+
+  
+</div>
+
+<a name='project'></a>
+## About The Project 
 `daily-runner` is an application that allows you to run other command line
 applications in a "daily" manner even when a computer is not running 24/7. The
 command will be run if more than 24 hours have passed since the last execution.
@@ -8,6 +24,27 @@ always run if the system is up at this preferred time. It is designed to easily
 run as a non system application with minimal installation by a typical non-root
 desktop linux user.
 
+<a name='motivation'></a>
+## Motivation
+
+I have been using [duply](https://duply.net/index.php/Main_Page) at work with
+great success, even used it once to migrate to a new computer, and I wanted to
+also setup backups for my home computers. 
+
+At work was running it via cron at lunchtime but for my home computers which I
+use randomly & sporadically I needed to find a different way to run it. I
+looked at fcron & anacron and I found them hard to install requiring system
+changes(fcron an compilation from sources) plus a steep learning & setup curve
+to reach my use case. 
+
+Gnome's [deja dup](https://wiki.gnome.org/Apps/DejaDup) is also an app that
+tries to solve the overall problem of home/personal computer backup and has the
+feature of "daily", "weekly" running of backup for systems that are not always
+online.  It's design imposes many defaults, so I was not able to set it up
+successfully for my use cases. 
+
+
+<a name='start'></a>
 ## Quick start
 
 * Grab the latest binary release from
@@ -46,6 +83,7 @@ Comment=
 * Alternatively you can use the gnome UI app `Startup Applications`
   accessible from your distro's launcher
 
+<a name='usage'></a>
 ## Usage
 
 ```
@@ -61,6 +99,8 @@ Usage of /home/gaganis/GolandProjects/bin/daily-runner:
   -profile string
         Profile to use. Defaults to 'default' (default "default")
 ```
+
+<a name='features'></a>
 
 ## Features
 
@@ -108,20 +148,9 @@ Locking is implemented via a pid file so that no more than one instance of
 In this case previous runs aren't taken into account. This option also disables
 process locking, so it is possible for multiple processes to run at the same time.
 
-## Motivation
 
-I have been using [duply](https://duply.net/index.php/Main_Page) at work with
-great success, even used it once to migrate to a new computer, and I wanted to
-also setup backups for my home computers. 
 
-At work was running it via cron at lunchtime but for my home computers which I
-use randomly & sporadically I needed to find a different way to run it. I
-looked at fcron & anacron and I found them hard to install requiring system
-changes(fcron an compilation from sources) plus a steep learning & setup curve
-to reach my use case. 
+<a name='license'></a>
 
-Gnome's [deja dup](https://wiki.gnome.org/Apps/DejaDup) is also an app that
-tries to solve the overall problem of home/personal computer backup and has the
-feature of "daily", "weekly" running of backup for systems that are not always
-online.  It's design imposes many defaults, so I was not able to set it up
-successfully for my use cases. 
+## License
+This project is licensed under the GNU GENERAL PUBLIC LICENSE. See `LICENSE` for more information.
